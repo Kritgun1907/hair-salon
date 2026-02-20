@@ -1,0 +1,68 @@
+import type { ApiFormData } from "@/types/booking";
+
+const BASE = import.meta.env.VITE_BACKEND_URL as string;
+
+/** Fetch dropdown options for the booking form. */
+export async function fetchFormData(): Promise<ApiFormData> {
+  const res = await fetch(`${BASE}/api/form-data`);
+  if (!res.ok) throw new Error("Failed to load form data");
+  return res.json();
+}
+
+export interface CreateOrderPayload {
+  name: string;
+  phone: string;
+  amount: number;
+}
+
+export interface CreateOrderResult {
+  order_id: string;
+  amount: number;
+  currency: string;
+  key_id: string;
+}
+
+/** Create a Razorpay order on the backend. */
+export async function createOrder(
+  payload: CreateOrderPayload
+): Promise<CreateOrderResult> {
+  const res = await fetch(`${BASE}/api/create-order`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to create order");
+  return data;
+}
+
+export interface VerifyOrderPayload {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+  name: string;
+  phone: string;
+  amount: number;
+}
+
+export interface VerifyOrderResult {
+  success: boolean;
+  payment_id: string;
+  amount: number;
+  name: string;
+  phone: string;
+}
+
+/** Verify the Razorpay payment signature on the backend. */
+export async function verifyOrderPayment(
+  payload: VerifyOrderPayload
+): Promise<VerifyOrderResult> {
+  const res = await fetch(`${BASE}/api/verify-order-payment`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Verification failed");
+  return data;
+}
