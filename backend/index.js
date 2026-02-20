@@ -4,10 +4,27 @@ const cors = require("cors");
 const crypto = require("crypto");
 const Razorpay = require("razorpay");
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+// Remove trailing slash so CORS origin matches the browser's Origin header
+const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/+$/, "");
 
 const app = express();
-app.use(cors({ origin: FRONTEND_URL }));
+
+// CORS — allow the frontend origin + handle preflight
+app.use(cors({
+  origin: FRONTEND_URL,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
+
+// Explicitly respond to all OPTIONS preflight requests
+app.options("*", cors({
+  origin: FRONTEND_URL,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
+
 app.use(express.json());
 
 const razorpay = new Razorpay({
@@ -114,6 +131,9 @@ app.get("/api/verify-payment", async (req, res) => {
     return res.status(500).json({ success: false, error: "Failed to fetch payment details" });
   }
 });
+
+// Root route
+app.get("/", (_req, res) => res.json({ service: "Hair Salon Backend API", status: "running" }));
 
 // Health check
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
