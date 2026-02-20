@@ -13,7 +13,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Combobox } from "@/components/ui/combobox";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { cn } from "@/lib/utils";
 import AppLayout from "@/layouts/AppLayout";
 import { useBookingForm } from "@/hooks/useBookingForm";
@@ -30,6 +30,7 @@ export default function BookingPage() {
     discountVal,
     handleChange,
     handleSelect,
+    handleMultiSelect,
     handleSubmit,
     handleReset,
   } = useBookingForm();
@@ -167,24 +168,21 @@ export default function BookingPage() {
               </Field>
 
               <Field label="Service Type">
-                <Select value={formData.serviceType} onValueChange={handleSelect("serviceType")}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select service type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {dropdownData.serviceTypes.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <MultiSelect
+                  items={dropdownData.serviceTypes}
+                  values={formData.serviceType}
+                  onValuesChange={handleMultiSelect("serviceType")}
+                  placeholder="Select service types…"
+                  searchPlaceholder="Search service types…"
+                />
               </Field>
 
               <Field label="Search Services">
-                <Combobox
+                <MultiSelect
                   items={dropdownData.services}
-                  value={formData.searchService}
-                  onValueChange={handleSelect("searchService")}
-                  placeholder="Search & select service…"
+                  values={formData.searchService}
+                  onValuesChange={handleMultiSelect("searchService")}
+                  placeholder="Search & select services…"
                   searchPlaceholder="Type to search…"
                 />
               </Field>
@@ -334,8 +332,9 @@ export default function BookingPage() {
                   </>
                 ) : (
                   <>
-                    <IndianRupee className="w-4 h-4" />
-                    Pay ₹{payable > 0 ? payable.toLocaleString("en-IN") : "—"} with Razorpay
+                    {payable > 0
+                      ? `Pay ₹${payable.toLocaleString("en-IN")} with Razorpay`
+                      : "Pay with Razorpay"}
                   </>
                 )}
               </span>

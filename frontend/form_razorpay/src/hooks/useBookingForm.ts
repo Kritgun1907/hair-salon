@@ -20,9 +20,9 @@ const EMPTY_FORM: BookingFormData = {
   startTime: "",
   endTime: "",
   artist: "",
-  serviceType: "",
+  serviceType: [],
   filledBy: "",
-  searchService: "",
+  searchService: [],
   discount: "",
   date: today,
 };
@@ -87,6 +87,12 @@ export function useBookingForm() {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
+
+  /** For multi-select fields (string[] values) — replaces the whole array. */
+  const handleMultiSelect =
+    (field: keyof BookingFormData) => (values: string[]) => {
+      setFormData((prev) => ({ ...prev, [field]: values }));
+    };
 
   // ── Reset ──────────────────────────────────────────────────────────────────
   const handleReset = () => {
@@ -183,6 +189,7 @@ export function useBookingForm() {
     discountVal,
     handleChange,
     handleSelect,
+    handleMultiSelect,
     handleSubmit,
     handleReset,
   };

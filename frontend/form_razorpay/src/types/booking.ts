@@ -51,9 +51,9 @@ export interface BookingFormData {
   startTime: string;
   endTime: string;
   artist: string;
-  serviceType: string;
+  serviceType: string[];
   filledBy: string;
-  searchService: string;
+  searchService: string[];
   discount: string;
   date: string;
 }
