@@ -115,6 +115,9 @@ app.get("/api/verify-payment", async (req, res) => {
   }
 });
 
+// Root route
+app.get("/", (_req, res) => res.json({ service: "Hair Salon Backend API", status: "running" }));
+
 // Health check
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
