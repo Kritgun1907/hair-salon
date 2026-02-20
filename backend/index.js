@@ -4,8 +4,10 @@ const cors = require("cors");
 const crypto = require("crypto");
 const Razorpay = require("razorpay");
 
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+
 const app = express();
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: FRONTEND_URL }));
 app.use(express.json());
 
 const razorpay = new Razorpay({
@@ -48,7 +50,7 @@ app.post("/api/create-payment-link", async (req, res) => {
         amount_inr: String(amount),
       },
       // Razorpay appends ?razorpay_payment_id=...&razorpay_signature=... etc.
-      callback_url: "http://localhost:5173/payment-status",
+      callback_url: `${FRONTEND_URL}/payment-status`,
       callback_method: "get",
     });
 
@@ -116,7 +118,12 @@ app.get("/api/verify-payment", async (req, res) => {
 // Health check
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log("Backend running at http://localhost:" + PORT);
-});
+// Local dev: listen normally. Vercel serverless: export the app.
+if (require.main === module) {
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => {
+    console.log("Backend running at http://localhost:" + PORT);
+  });
+}
+
+module.exports = app;
