@@ -1,7 +1,20 @@
+/**
+ * @file BookingPage.tsx
+ * @description Full appointment booking form.
+ *
+ * Organised into three visual sections:
+ *   01 — Client Details (name, phone, age, gender)
+ *   02 — Appointment Details (date, artist, times, services, staff)
+ *   03 — Payment (amount, discount, Razorpay checkout)
+ *
+ * All form logic lives in the `useBookingForm` hook; this file
+ * is purely presentational.
+ */
+
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  User, Phone, IndianRupee, Calendar,
-  Clock, Tag, Percent, UserCheck,
+  User, Phone, Calendar,
+  Clock, Percent, UserCheck, Calculator,
 } from "lucide-react";
 import { SparklesCore } from "@/components/ui/sparkles";
 import { Input } from "@/components/ui/input";
@@ -25,9 +38,11 @@ export default function BookingPage() {
     isLoading,
     paymentError,
     dropdownData,
+    serviceDisplayItems,
+    subtotal,
+    discountPct,
+    discountAmt,
     payable,
-    finalAmount,
-    discountVal,
     handleChange,
     handleSelect,
     handleMultiSelect,
@@ -179,7 +194,7 @@ export default function BookingPage() {
 
               <Field label="Search Services">
                 <MultiSelect
-                  items={dropdownData.services}
+                  items={serviceDisplayItems}
                   values={formData.searchService}
                   onValuesChange={handleMultiSelect("searchService")}
                   placeholder="Search & select services…"
@@ -210,27 +225,30 @@ export default function BookingPage() {
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <Field label="Amount (₹)" required error={errors.amount}>
                 <div className="relative">
-                  <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
+                  <Calculator className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
                   <Input
-                    id="amount" name="amount" type="number"
-                    placeholder="e.g. 1500"
-                    value={formData.amount}
-                    onChange={handleChange}
-                    min="1"
-                    className={cn("pl-9", errors.amount && "border-red-400 focus-visible:ring-red-300")}
+                    id="amount" name="amount" type="text"
+                    value={subtotal > 0 ? `₹${subtotal.toLocaleString("en-IN")}` : "Select services above"}
+                    readOnly
+                    tabIndex={-1}
+                    className={cn(
+                      "pl-9 bg-stone-50 cursor-default text-stone-600",
+                      errors.amount && "border-red-400 focus-visible:ring-red-300"
+                    )}
                   />
                 </div>
               </Field>
 
-              <Field label="Discount (₹)">
+              <Field label="Discount (%)">
                 <div className="relative">
                   <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
                   <Input
                     id="discount" name="discount" type="number"
-                    placeholder="e.g. 100"
+                    placeholder="e.g. 10"
                     value={formData.discount}
                     onChange={handleChange}
                     min="0"
+                    max="100"
                     className="pl-9"
                   />
                 </div>
@@ -239,7 +257,7 @@ export default function BookingPage() {
 
             {/* Payable summary */}
             <AnimatePresence>
-              {formData.amount && !errors.amount && (
+              {subtotal > 0 && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
@@ -247,15 +265,15 @@ export default function BookingPage() {
                   className="mt-5 rounded-xl border border-stone-200 bg-stone-50 px-5 py-4"
                 >
                   <div className="flex items-center justify-between text-sm text-stone-500 mb-1">
-                    <span>Service amount</span>
-                    <span>₹{finalAmount.toLocaleString("en-IN")}</span>
+                    <span>Service total ({formData.searchService.length} item{formData.searchService.length !== 1 ? "s" : ""})</span>
+                    <span>₹{subtotal.toLocaleString("en-IN")}</span>
                   </div>
-                  {discountVal > 0 && (
+                  {discountPct > 0 && (
                     <div className="flex items-center justify-between text-sm text-emerald-600 mb-1">
                       <span className="flex items-center gap-1">
-                        <Tag className="w-3.5 h-3.5" /> Discount
+                        <Percent className="w-3.5 h-3.5" /> Discount ({discountPct}%)
                       </span>
-                      <span>− ₹{discountVal.toLocaleString("en-IN")}</span>
+                      <span>− ₹{discountAmt.toLocaleString("en-IN")}</span>
                     </div>
                   )}
                   <div className="border-t border-stone-200 mt-2 pt-2 flex items-center justify-between font-bold text-stone-900">

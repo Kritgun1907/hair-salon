@@ -1,3 +1,9 @@
+/**
+ * @file combobox.tsx
+ * @description Single-value searchable combobox using cmdk + Radix Popover.
+ *              Provides keyboard-navigable selection with a search input.
+ */
+
 "use client";
 
 import * as React from "react";

@@ -1,3 +1,11 @@
+/**
+ * @file LandingPage.tsx
+ * @description Hero landing page with animated entry transitions.
+ *
+ * Contains a headline, tagline, two CTA buttons (Book / Analytics),
+ * and decorative feature pills at the bottom.
+ */
+
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ClipboardList, BarChart2, Scissors, Sparkles } from "lucide-react";

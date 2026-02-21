@@ -1,5 +1,15 @@
+/**
+ * @file api.ts
+ * @description HTTP client functions for the booking form.
+ *
+ * All calls hit the Express backend defined by VITE_BACKEND_URL.
+ * Each function includes response-status checks and throws on failure
+ * so the caller can render user-friendly error messages.
+ */
+
 import type { ApiFormData } from "@/types/booking";
 
+/** Backend base URL (injected at build time). */
 const BASE = import.meta.env.VITE_BACKEND_URL as string;
 
 /** Fetch dropdown options for the booking form. */

@@ -1,3 +1,11 @@
+/**
+ * @file AppLayout.tsx
+ * @description Shared layout shell for all pages (except PaymentStatus).
+ *
+ * Provides a sticky header with logo, navigation links, and an optional
+ * subtitle. Wraps page content in a max-width container.
+ */
+
 import { Scissors } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 

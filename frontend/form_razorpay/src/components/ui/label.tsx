@@ -1,3 +1,8 @@
+/**
+ * @file label.tsx
+ * @description Styled Radix UI Label with variant support (shadcn/ui pattern).
+ */
+
 import * as React from "react";
 import * as LabelPrimitive from "@radix-ui/react-label";
 import { cva, type VariantProps } from "class-variance-authority";

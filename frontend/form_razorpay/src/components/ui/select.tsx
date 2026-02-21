@@ -1,3 +1,9 @@
+/**
+ * @file select.tsx
+ * @description Styled Radix UI Select primitives (Trigger, Content, Item, etc.).
+ *              Follows the shadcn/ui pattern with Tailwind classes.
+ */
+
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";

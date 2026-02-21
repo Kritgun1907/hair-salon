@@ -1,3 +1,9 @@
+/**
+ * @file background-beams.tsx
+ * @description Animated SVG beam lines used as a decorative background.
+ *              Inspired by Aceternity UI.
+ */
+
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 

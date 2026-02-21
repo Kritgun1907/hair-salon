@@ -1,3 +1,9 @@
+/**
+ * @file sparkles.tsx
+ * @description Canvas-based sparkle / particle animation.
+ *              Renders floating particles behind child content.
+ */
+
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 

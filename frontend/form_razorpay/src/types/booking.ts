@@ -1,3 +1,10 @@
+/**
+ * @file booking.ts
+ * @description TypeScript type definitions for the booking flow.
+ *
+ * Includes Razorpay SDK window augmentation, API response shapes,
+ * and form-state interfaces used by useBookingForm.
+ */
 // ─── Razorpay SDK types ───────────────────────────────────────────────────────
 
 export interface RazorpayOptions {
@@ -33,11 +40,18 @@ export interface DropdownItem {
   name: string;
 }
 
+/** Service item returned by the backend — includes a price. */
+export interface ServiceItem {
+  id: string;
+  name: string;
+  price: number;
+}
+
 export interface ApiFormData {
   artists: DropdownItem[];
   serviceTypes: DropdownItem[];
   staff: DropdownItem[];
-  services: DropdownItem[];
+  services: ServiceItem[];
 }
 
 // ─── Form state types ─────────────────────────────────────────────────────────

@@ -1,0 +1,179 @@
+/**
+ * @file EmployeeDeepDive.tsx
+ * @description Detailed performance breakdown for a selected employee.
+ *
+ * Fetches the employee list from GET /api/analytics/employees,
+ * then loads per-artist stats from GET /api/analytics/employee/:name.
+ * Includes stat cards, a top-services bar chart, and a written summary.
+ */
+
+import { useEffect, useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { User, TrendingUp, Clock, Users, Award } from "lucide-react";
+
+interface EmployeeDetail {
+  name: string;
+  customersServed: number;
+  uniqueCustomers: number;
+  revenue: number;
+  hoursWorked: number;
+  avgRevenuePerVisit: number;
+  topServices: { service: string; count: number; revenue: number }[];
+  rank: number;
+  totalArtists: number;
+}
+
+interface EmployeeName {
+  name: string;
+}
+
+interface Props {
+  api: string;
+  qs: string;
+}
+
+export default function EmployeeDeepDive({ api, qs }: Props) {
+  const [employees, setEmployees] = useState<EmployeeName[]>([]);
+  const [selected, setSelected] = useState("");
+  const [data, setData] = useState<EmployeeDetail | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch employee list
+  useEffect(() => {
+    fetch(`${api}/api/analytics/employees?${qs}`)
+      .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then((list: EmployeeName[]) => {
+        setEmployees(Array.isArray(list) ? list : []);
+        if (Array.isArray(list) && list.length > 0) {
+          setSelected(list[0].name);
+        } else {
+          setSelected("");
+          setData(null);
+        }
+      })
+      .catch((err) => { console.error(err); setEmployees([]); setSelected(""); setData(null); });
+  }, [api, qs]);
+
+  // Fetch selected employee detail
+  useEffect(() => {
+    if (!selected) {
+      setData(null);
+      return;
+    }
+    setLoading(true);
+    fetch(`${api}/api/analytics/employee/${encodeURIComponent(selected)}?${qs}`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(setData)
+      .catch(() => setData(null))
+      .finally(() => setLoading(false));
+  }, [api, qs, selected]);
+
+  return (
+    <div className="bg-white border border-stone-200 rounded-xl p-6 shadow-sm">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-lg font-semibold text-stone-900">Employee Deep Dive</h2>
+          <p className="text-sm text-stone-500">Detailed performance breakdown</p>
+        </div>
+        {employees.length > 0 && (
+          <select
+            value={selected}
+            onChange={(e) => setSelected(e.target.value)}
+            className="bg-white border border-stone-200 rounded-lg px-4 py-2 text-sm text-stone-800 outline-none focus:border-stone-400"
+          >
+            {employees.map((e) => (
+              <option key={e.name} value={e.name}>
+                {e.name}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {employees.length === 0 && !loading ? (
+        <p className="text-stone-400 text-center py-12">No employee data available for this period</p>
+      ) : loading ? (
+        <div className="animate-pulse space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-stone-100 rounded-lg h-24" />
+            ))}
+          </div>
+          <div className="h-48 bg-stone-100 rounded-lg" />
+        </div>
+      ) : data && data.customersServed > 0 ? (
+        <>
+          {/* Stat cards */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            <StatCard icon={Award} label="Rank" value={`#${data.rank} of ${data.totalArtists}`} color="text-amber-500" />
+            <StatCard icon={TrendingUp} label="Revenue" value={`₹${data.revenue.toLocaleString("en-IN")}`} color="text-emerald-600" />
+            <StatCard icon={Users} label="Customers" value={String(data.customersServed)} color="text-blue-500" />
+            <StatCard icon={Clock} label="Hours Worked" value={`${data.hoursWorked}h`} color="text-purple-500" />
+            <StatCard icon={User} label="Avg ₹/Visit" value={`₹${data.avgRevenuePerVisit.toLocaleString("en-IN")}`} color="text-pink-500" />
+          </div>
+
+          {/* Top services bar chart */}
+          {data.topServices.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm font-medium text-stone-600 mb-3">Top Services by {data.name}</p>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={data.topServices}>
+                  <XAxis dataKey="service" stroke="#d6d3d1" tick={{ fill: "#78716c", fontSize: 11 }} />
+                  <YAxis stroke="#d6d3d1" tick={{ fill: "#78716c", fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{ background: "#fff", border: "1px solid #e7e5e4", borderRadius: 8, color: "#1c1917" }}
+                    formatter={(value) => [`${value}`, "Bookings"]}
+                  />
+                  <Bar dataKey="count" fill="#60a5fa" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Written summary for the owner */}
+          <div className="p-4 bg-stone-50 border border-stone-100 rounded-lg space-y-2">
+            <p className="text-sm font-medium text-stone-700">Performance Summary:</p>
+            <p className="text-sm text-stone-600">
+              <span className="text-stone-900 font-medium">{data.name}</span> is ranked{" "}
+              <span className="text-amber-600 font-medium">#{data.rank}</span> out of {data.totalArtists} artists.
+            </p>
+            <p className="text-sm text-stone-600">
+              Generated <span className="text-emerald-600 font-medium">₹{data.revenue.toLocaleString("en-IN")}</span> from{" "}
+              {data.customersServed} customers in {data.hoursWorked} hours of work.
+            </p>
+            <p className="text-sm text-stone-600">
+              Average earning per customer visit: <span className="text-stone-900 font-medium">₹{data.avgRevenuePerVisit.toLocaleString("en-IN")}</span>
+            </p>
+            {data.rank === 1 && (
+              <p className="text-sm text-amber-600 font-medium mt-1">
+                ⭐ Top performer — recommended for incentive!
+              </p>
+            )}
+            {data.rank === data.totalArtists && data.totalArtists > 1 && (
+              <p className="text-sm text-red-500 mt-1">
+                Needs improvement — lowest ranked this period.
+              </p>
+            )}
+          </div>
+        </>
+      ) : (
+        <p className="text-stone-400 text-center py-8">Select an employee to view details</p>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: string; color: string }) {
+  return (
+    <div className="bg-white border border-stone-200 rounded-lg p-4">
+      <div className="flex items-center gap-1.5 mb-2">
+        <Icon className={`w-4 h-4 ${color}`} />
+        <span className="text-xs text-stone-500">{label}</span>
+      </div>
+      <p className="text-lg font-bold text-stone-900">{value}</p>
+    </div>
+  );
+}

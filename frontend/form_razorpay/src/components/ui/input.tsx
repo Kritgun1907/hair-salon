@@ -1,3 +1,8 @@
+/**
+ * @file input.tsx
+ * @description Styled text input following the shadcn/ui pattern.
+ */
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
 

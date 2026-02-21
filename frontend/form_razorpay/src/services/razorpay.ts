@@ -1,4 +1,12 @@
-/** Dynamically injects the Razorpay Checkout SDK script once. */
+/**
+ * @file razorpay.ts
+ * @description Dynamically loads the Razorpay Checkout SDK.
+ *
+ * The script tag is injected once on first call; subsequent calls
+ * resolve immediately without reinserting the tag.
+ */
+
+/** Injects the Razorpay Checkout `<script>` tag into the DOM. */
 export function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
     if (document.getElementById("razorpay-script")) return resolve(true);

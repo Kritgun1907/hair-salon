@@ -1,3 +1,9 @@
+/**
+ * @file multi-select.tsx
+ * @description Multi-value selector using cmdk + Radix Popover.
+ *              Renders a searchable dropdown with checkbox-style item selection.
+ */
+
 "use client";
 
 import * as React from "react";
